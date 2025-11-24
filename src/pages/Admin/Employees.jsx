@@ -64,10 +64,14 @@ export default function Employees() {
     fetchInProgressRef.current = true
     setLoading(true)
     try {
+      // Use the latest page and rowsPerPage values from state
+      const currentPage = page
+      const currentRowsPerPage = rowsPerPage
+      
       const response = await api.get('/admin/employees', {
         params: {
-          page: page + 1,
-          per_page: rowsPerPage,
+          page: currentPage + 1,
+          per_page: currentRowsPerPage,
         },
       })
       if (isMountedRef.current) {
@@ -85,7 +89,9 @@ export default function Employees() {
   }
 
   useEffect(() => {
-    if (isMountedRef.current && !fetchInProgressRef.current) {
+    if (isMountedRef.current) {
+      // Reset fetch flag when page/rowsPerPage changes to allow new fetch
+      fetchInProgressRef.current = false
       fetchEmployees()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

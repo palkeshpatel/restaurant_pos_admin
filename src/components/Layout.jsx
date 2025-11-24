@@ -63,12 +63,7 @@ export default function Layout({ children }) {
   }
 
   const menuManagementItems = [
-    { text: 'Menu Categories', icon: <RestaurantIcon />, path: '/admin/menu-categories' },
-    { text: 'Menu Items', icon: <RestaurantIcon />, path: '/admin/menu-items' },
-    { text: 'Modifier Groups', icon: <RestaurantIcon />, path: '/admin/modifier-groups' },
-    { text: 'Modifiers', icon: <RestaurantIcon />, path: '/admin/modifiers' },
-    { text: 'Decision Groups', icon: <SecurityIcon />, path: '/admin/decision-groups' },
-    { text: 'Decisions', icon: <SecurityIcon />, path: '/admin/decisions' },
+    { text: 'Menu Management', icon: <RestaurantIcon />, path: '/admin/menu-management' },
   ]
 
   const isMenuManagementActive = menuManagementItems.some(

@@ -16,7 +16,6 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  Collapse,
   IconButton,
   useMediaQuery,
   useTheme,
@@ -30,8 +29,6 @@ import {
   Security as SecurityIcon,
   Logout as LogoutIcon,
   Menu as MenuIcon,
-  ExpandLess,
-  ExpandMore,
 } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -46,8 +43,6 @@ export default function Layout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
-  const [menuManagementOpen, setMenuManagementOpen] = useState(true)
-
   // Check if user is super admin - handle both boolean true and string "1" or number 1
   const isSuperAdmin = 
     user?.is_super_admin === true || 
@@ -62,21 +57,6 @@ export default function Layout({ children }) {
     console.log('isSuperAdmin calculated:', isSuperAdmin)
   }
 
-  const menuManagementItems = [
-    { text: 'Menu Management', icon: <RestaurantIcon />, path: '/admin/menu-management' },
-  ]
-
-  const isMenuManagementActive = menuManagementItems.some(
-    (item) => pathname === item.path
-  )
-
-  // Auto-open menu management if on one of its pages
-  useEffect(() => {
-    if (isMenuManagementActive && !menuManagementOpen) {
-      setMenuManagementOpen(true)
-    }
-  }, [pathname, isMenuManagementActive, menuManagementOpen])
-
   const menuItems = isSuperAdmin
     ? [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
@@ -89,9 +69,8 @@ export default function Layout({ children }) {
         { text: 'Roles', icon: <SecurityIcon />, path: '/admin/roles' },
         { text: 'Permissions', icon: <SecurityIcon />, path: '/admin/permissions' },
         { text: 'Discount Reasons', icon: <SecurityIcon />, path: '/admin/discount-reasons' },
-        { text: 'Floors', icon: <TableIcon />, path: '/admin/floors' },
-        { text: 'Tables', icon: <TableIcon />, path: '/admin/tables' },
-        { text: 'Menus', icon: <RestaurantIcon />, path: '/admin/menus' },
+        { text: 'Floor & Table Management', icon: <TableIcon />, path: '/admin/floor-table-management' },
+        { text: 'Menu Management', icon: <RestaurantIcon />, path: '/admin/menu-management' },
         { text: 'Tax Rates', icon: <SecurityIcon />, path: '/admin/tax-rates' },
         { text: 'Printers', icon: <SecurityIcon />, path: '/admin/printers' },
       ]
@@ -135,44 +114,6 @@ export default function Layout({ children }) {
               </ListItemButton>
             </ListItem>
           ))}
-          
-          {!isSuperAdmin && (
-            <>
-              <ListItem disablePadding>
-                <ListItemButton
-                  selected={isMenuManagementActive}
-                  onClick={() => setMenuManagementOpen(!menuManagementOpen)}
-                >
-                  <ListItemIcon>
-                    <RestaurantIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Menu Management" />
-                  {menuManagementOpen ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-              </ListItem>
-              <Collapse in={menuManagementOpen} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {menuManagementItems.map((item) => (
-                    <ListItem key={item.text} disablePadding>
-                      <ListItemButton
-                        selected={pathname === item.path}
-                        onClick={() => {
-                          router.push(item.path)
-                          if (isMobile) {
-                            setMobileOpen(false)
-                          }
-                        }}
-                        sx={{ pl: 4 }}
-                      >
-                        <ListItemIcon>{item.icon}</ListItemIcon>
-                        <ListItemText primary={item.text} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </>
-          )}
         </List>
       </Box>
     </Box>

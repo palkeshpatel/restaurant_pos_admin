@@ -88,9 +88,9 @@ export default function MenuManagement() {
         api.get('/admin/menu-categories', { params: { per_page: 1000 } }).catch(() => ({ data: { data: [] } })),
         api.get('/admin/menu-items', { params: { per_page: 1000 } }).catch(() => ({ data: { data: { data: [] } } })),
         api.get('/admin/modifier-groups').catch(() => ({ data: { data: { data: [] } } })),
-        api.get('/admin/modifiers').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/decision-groups').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/decisions').catch(() => ({ data: { data: [] } })),
+        api.get('/admin/modifiers', { params: { per_page: 1000 } }).catch(() => ({ data: { data: [] } })),
+        api.get('/admin/decision-groups', { params: { per_page: 1000 } }).catch(() => ({ data: { data: [] } })),
+        api.get('/admin/decisions', { params: { per_page: 1000 } }).catch(() => ({ data: { data: [] } })),
       ])
 
       // Menu items should already have relationships from the API
@@ -104,12 +104,16 @@ export default function MenuManagement() {
         const categoriesData = categoriesRes.data.data?.data || categoriesRes.data.data || []
         const itemsData = itemsRes.data.data || []
         const modGroupsData = modGroupsRes.data.data?.data || modGroupsRes.data.data || []
-        const modsData = modsRes.data.data || []
-        const decGroupsData = decGroupsRes.data.data || []
-        const decsData = decsRes.data.data || []
+        // Handle paginated modifiers response
+        const modsData = modsRes.data.data?.data || modsRes.data.data || []
+        // Handle paginated decision groups response
+        const decGroupsData = decGroupsRes.data.data?.data || decGroupsRes.data.data || []
+        // Handle paginated decisions response
+        const decsData = decsRes.data.data?.data || decsRes.data.data || []
 
         console.log('Fetched Categories:', categoriesData)
         console.log('Fetched Menus:', menusData)
+        console.log('Fetched Decision Groups:', decGroupsData)
 
         setMenus(Array.isArray(menusData) ? menusData : [])
         setCategories(Array.isArray(categoriesData) ? categoriesData : [])
@@ -778,10 +782,13 @@ export default function MenuManagement() {
 
   const renderModifiers = () => {
     if (!Array.isArray(modifierGroups)) return null
+    console.log('Modifier Groups:', modifierGroups)
+    console.log('All Modifiers:', modifiers)
     return (
       <Grid container spacing={2}>
         {modifierGroups.map((group) => {
-          const groupModifiers = Array.isArray(modifiers) ? modifiers.filter((m) => m.group_id == group.id) : []
+          const groupModifiers = Array.isArray(modifiers) ? modifiers.filter((m) => String(m.group_id) === String(group.id)) : []
+          console.log(`Modifiers for group "${group.name}" (ID: ${group.id}):`, groupModifiers)
           return (
             <Grid item xs={12} md={6} key={group.id}>
               <Card>
@@ -807,46 +814,71 @@ export default function MenuManagement() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     Min: {group.min_select} | Max: {group.max_select}
                   </Typography>
-                  <List dense>
-                    {groupModifiers.map((modifier) => (
-                      <ListItem
-                        key={modifier.id}
-                        sx={{
-                          bgcolor: 'grey.50',
-                          mb: 0.5,
-                          borderRadius: 1,
-                        }}
-                      >
-                        <ListItemText
-                          primary={modifier.name}
-                          secondary={`+$${modifier.additional_price || 0}`}
-                        />
-                        <ListItemSecondaryAction>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenDialog('modifier', modifier)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDelete('modifier', modifier.id)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    ))}
-                  </List>
+                  {groupModifiers.length > 0 ? (
+                    <List dense>
+                      {groupModifiers.map((modifier) => (
+                        <ListItem
+                          key={modifier.id}
+                          sx={{
+                            bgcolor: 'grey.50',
+                            mb: 0.5,
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Typography variant="body1" fontWeight="medium">
+                                  {modifier.name}
+                                </Typography>
+                                {modifier.additional_price > 0 && (
+                                  <Chip
+                                    label={`+$${modifier.additional_price}`}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                  />
+                                )}
+                              </Box>
+                            }
+                            secondary={modifier.additional_price === 0 ? 'No additional charge' : ''}
+                          />
+                          <ListItemSecondaryAction>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDialog('modifier', modifier)}
+                              title="Edit Modifier"
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete('modifier', modifier.id)}
+                              color="error"
+                              title="Delete Modifier"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: 'italic' }}>
+                      No modifiers. Add one to get started!
+                    </Typography>
+                  )}
                   <Button
-                    size="small"
+                    fullWidth
+                    variant="outlined"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpenDialog('modifier', null, { groupId: group.id })}
-                    fullWidth
-                    sx={{ mt: 1 }}
+                    sx={{ mt: 2 }}
+                    color="primary"
                   >
-                    Add Modifier
+                    + ADD MODIFIER
                   </Button>
                 </CardContent>
               </Card>
@@ -874,10 +906,13 @@ export default function MenuManagement() {
 
   const renderDecisions = () => {
     if (!Array.isArray(decisionGroups)) return null
+    console.log('Decision Groups:', decisionGroups)
+    console.log('All Decisions:', decisions)
     return (
       <Grid container spacing={2}>
         {decisionGroups.map((group) => {
-          const groupDecisions = Array.isArray(decisions) ? decisions.filter((d) => d.group_id == group.id) : []
+          const groupDecisions = Array.isArray(decisions) ? decisions.filter((d) => String(d.group_id) === String(group.id)) : []
+          console.log(`Decisions for group "${group.name}" (ID: ${group.id}):`, groupDecisions)
           return (
             <Grid item xs={12} md={6} key={group.id}>
               <Card>
@@ -900,43 +935,60 @@ export default function MenuManagement() {
                       </IconButton>
                     </Box>
                   </Box>
-                  <List dense>
-                    {groupDecisions.map((decision) => (
-                      <ListItem
-                        key={decision.id}
-                        sx={{
-                          bgcolor: 'grey.50',
-                          mb: 0.5,
-                          borderRadius: 1,
-                        }}
-                      >
-                        <ListItemText primary={decision.name} />
-                        <ListItemSecondaryAction>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenDialog('decision', decision)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDelete('decision', decision.id)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    ))}
-                  </List>
+                  {groupDecisions.length > 0 ? (
+                    <List dense>
+                      {groupDecisions.map((decision) => (
+                        <ListItem
+                          key={decision.id}
+                          sx={{
+                            bgcolor: 'grey.50',
+                            mb: 0.5,
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography variant="body1" fontWeight="medium">
+                                {decision.name}
+                              </Typography>
+                            }
+                          />
+                          <ListItemSecondaryAction>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDialog('decision', decision)}
+                              title="Edit Decision"
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete('decision', decision.id)}
+                              color="error"
+                              title="Delete Decision"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: 'italic' }}>
+                      No decisions. Add one to get started!
+                    </Typography>
+                  )}
                   <Button
-                    size="small"
+                    fullWidth
+                    variant="outlined"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpenDialog('decision', null, { groupId: group.id })}
-                    fullWidth
-                    sx={{ mt: 1 }}
+                    sx={{ mt: 2 }}
+                    color="secondary"
                   >
-                    Add Decision
+                    + ADD DECISION
                   </Button>
                 </CardContent>
               </Card>

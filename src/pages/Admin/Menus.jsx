@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -41,12 +41,22 @@ export default function Menus() {
     is_active: true,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchMenus()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchMenus = async () => {
+    if (fetchInProgressRef.current) {
+      return
+    }
+    
+    fetchInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/menus', {
@@ -55,14 +65,26 @@ export default function Menus() {
           per_page: rowsPerPage,
         },
       })
-      setMenus(response.data.data?.data || response.data.data || [])
-      setTotal(response.data.data?.total || response.data.data?.length || 0)
+      if (isMountedRef.current) {
+        setMenus(response.data.data?.data || response.data.data || [])
+        setTotal(response.data.data?.total || response.data.data?.length || 0)
+      }
     } catch (error) {
       console.error('Error fetching menus:', error)
     } finally {
-      setLoading(false)
+      fetchInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchInProgressRef.current) {
+      fetchMenus()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

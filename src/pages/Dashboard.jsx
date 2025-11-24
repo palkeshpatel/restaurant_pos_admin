@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { Box, Typography, Grid, Card, CardContent, Paper, CardActionArea, CircularProgress } from '@mui/material'
 import {
@@ -14,13 +16,13 @@ import {
   Print as PrintIcon,
   AttachMoney as MoneyIcon,
 } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const router = useRouter()
   const isSuperAdmin = user?.is_super_admin
   const [businessCount, setBusinessCount] = useState(0)
   const [userCount, setUserCount] = useState(0)
@@ -161,7 +163,7 @@ export default function Dashboard() {
           <>
             <Grid item xs={12} sm={6} md={6}>
               <Card>
-                <CardActionArea onClick={() => navigate('/super-admin/businesses')}>
+                <CardActionArea onClick={() => router.push('/super-admin/businesses')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -185,7 +187,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
               <Card>
-                <CardActionArea onClick={() => navigate('/super-admin/users')}>
+                <CardActionArea onClick={() => router.push('/super-admin/users')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -212,7 +214,7 @@ export default function Dashboard() {
           <>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/employees')}>
+                <CardActionArea onClick={() => router.push('/admin/employees')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -236,7 +238,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/roles')}>
+                <CardActionArea onClick={() => router.push('/admin/roles')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -260,7 +262,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/permissions')}>
+                <CardActionArea onClick={() => router.push('/admin/permissions')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -284,7 +286,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/discount-reasons')}>
+                <CardActionArea onClick={() => router.push('/admin/discount-reasons')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -308,7 +310,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/floors')}>
+                <CardActionArea onClick={() => router.push('/admin/floors')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -332,7 +334,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/tables')}>
+                <CardActionArea onClick={() => router.push('/admin/tables')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -356,7 +358,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/menus')}>
+                <CardActionArea onClick={() => router.push('/admin/menus')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -380,7 +382,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/menu-categories')}>
+                <CardActionArea onClick={() => router.push('/admin/menu-categories')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -404,7 +406,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/menu-items')}>
+                <CardActionArea onClick={() => router.push('/admin/menu-items')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -428,7 +430,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/modifier-groups')}>
+                <CardActionArea onClick={() => router.push('/admin/modifier-groups')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -452,7 +454,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/modifiers')}>
+                <CardActionArea onClick={() => router.push('/admin/modifiers')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -476,7 +478,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/decision-groups')}>
+                <CardActionArea onClick={() => router.push('/admin/decision-groups')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -500,7 +502,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/decisions')}>
+                <CardActionArea onClick={() => router.push('/admin/decisions')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -524,7 +526,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/tax-rates')}>
+                <CardActionArea onClick={() => router.push('/admin/tax-rates')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -548,7 +550,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <CardActionArea onClick={() => navigate('/admin/printers')}>
+                <CardActionArea onClick={() => router.push('/admin/printers')}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>

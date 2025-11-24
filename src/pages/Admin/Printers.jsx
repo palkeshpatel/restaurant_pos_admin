@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -40,12 +40,22 @@ export default function Printers() {
     is_receipt: false,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchPrinters()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchPrinters = async () => {
+    if (fetchInProgressRef.current) {
+      return
+    }
+    
+    fetchInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/printers', {
@@ -54,14 +64,26 @@ export default function Printers() {
           per_page: rowsPerPage,
         },
       })
-      setPrinters(response.data.data?.data || response.data.data || [])
-      setTotal(response.data.data?.total || response.data.data?.length || 0)
+      if (isMountedRef.current) {
+        setPrinters(response.data.data?.data || response.data.data || [])
+        setTotal(response.data.data?.total || response.data.data?.length || 0)
+      }
     } catch (error) {
       console.error('Error fetching printers:', error)
     } finally {
-      setLoading(false)
+      fetchInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchInProgressRef.current) {
+      fetchPrinters()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

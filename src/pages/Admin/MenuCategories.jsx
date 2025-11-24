@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -50,11 +50,16 @@ export default function MenuCategories() {
     is_active: true,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchCategoriesInProgressRef = useRef(false)
+  const fetchMenusInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchCategories()
-    fetchMenus()
-  }, [page, rowsPerPage, selectedMenuId])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Filter categories based on selected menu
   useEffect(() => {
@@ -69,42 +74,76 @@ export default function MenuCategories() {
   }, [selectedMenuId, allCategories])
 
   const fetchCategories = async () => {
+    if (fetchCategoriesInProgressRef.current) {
+      return
+    }
+    
+    fetchCategoriesInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/menu-categories')
       const data = response.data.data || []
       const categoriesArray = Array.isArray(data) ? data : []
-      setAllCategories(categoriesArray)
       
-      // Apply filter if menu is selected
-      if (selectedMenuId) {
-        const filtered = categoriesArray.filter((cat) => cat.menu_id == selectedMenuId)
-        setCategories(filtered)
-        setTotal(filtered.length)
-      } else {
-        setCategories(categoriesArray)
-        setTotal(categoriesArray.length)
+      if (isMountedRef.current) {
+        setAllCategories(categoriesArray)
+        
+        // Apply filter if menu is selected
+        if (selectedMenuId) {
+          const filtered = categoriesArray.filter((cat) => cat.menu_id == selectedMenuId)
+          setCategories(filtered)
+          setTotal(filtered.length)
+        } else {
+          setCategories(categoriesArray)
+          setTotal(categoriesArray.length)
+        }
       }
     } catch (error) {
       console.error('Error fetching menu categories:', error)
-      setAllCategories([])
-      setCategories([])
-      setTotal(0)
+      if (isMountedRef.current) {
+        setAllCategories([])
+        setCategories([])
+        setTotal(0)
+      }
     } finally {
-      setLoading(false)
+      fetchCategoriesInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   const fetchMenus = async () => {
+    if (fetchMenusInProgressRef.current) {
+      return
+    }
+    
+    fetchMenusInProgressRef.current = true
     try {
       const response = await api.get('/admin/menus')
       const data = response.data.data || []
-      setMenus(Array.isArray(data) ? data : [])
+      if (isMountedRef.current) {
+        setMenus(Array.isArray(data) ? data : [])
+      }
     } catch (error) {
       console.error('Error fetching menus:', error)
-      setMenus([])
+      if (isMountedRef.current) {
+        setMenus([])
+      }
+    } finally {
+      fetchMenusInProgressRef.current = false
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchCategoriesInProgressRef.current) {
+      fetchCategories()
+    }
+    if (isMountedRef.current && !fetchMenusInProgressRef.current) {
+      fetchMenus()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage, selectedMenuId])
 
   // Get parent categories for the selected menu
   const getParentCategories = () => {

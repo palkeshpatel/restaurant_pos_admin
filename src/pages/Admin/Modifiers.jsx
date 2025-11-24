@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -42,13 +42,23 @@ export default function Modifiers() {
     additional_price: 0,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchModifiersInProgressRef = useRef(false)
+  const fetchGroupsInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchModifiers()
-    fetchGroups()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchModifiers = async () => {
+    if (fetchModifiersInProgressRef.current) {
+      return
+    }
+    
+    fetchModifiersInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/modifiers', {
@@ -58,33 +68,60 @@ export default function Modifiers() {
         },
       })
       console.log('Modifiers API Response:', response.data)
-      // API returns { success: true, data: [...] }
       const data = response.data.data || []
-      setModifiers(Array.isArray(data) ? data : [])
-      setTotal(Array.isArray(data) ? data.length : 0)
+      if (isMountedRef.current) {
+        setModifiers(Array.isArray(data) ? data : [])
+        setTotal(Array.isArray(data) ? data.length : 0)
+      }
     } catch (error) {
       console.error('Error fetching modifiers:', error)
       console.error('Error details:', error.response?.data)
-      setModifiers([])
-      setTotal(0)
+      if (isMountedRef.current) {
+        setModifiers([])
+        setTotal(0)
+      }
       if (error.response?.status === 404) {
         alert('Modifiers endpoint not found. Please check the API route.')
       }
     } finally {
-      setLoading(false)
+      fetchModifiersInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   const fetchGroups = async () => {
+    if (fetchGroupsInProgressRef.current) {
+      return
+    }
+    
+    fetchGroupsInProgressRef.current = true
     try {
       const response = await api.get('/admin/modifier-groups')
       const data = response.data.data || []
-      setGroups(Array.isArray(data) ? data : [])
+      if (isMountedRef.current) {
+        setGroups(Array.isArray(data) ? data : [])
+      }
     } catch (error) {
       console.error('Error fetching modifier groups:', error)
-      setGroups([])
+      if (isMountedRef.current) {
+        setGroups([])
+      }
+    } finally {
+      fetchGroupsInProgressRef.current = false
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchModifiersInProgressRef.current) {
+      fetchModifiers()
+    }
+    if (isMountedRef.current && !fetchGroupsInProgressRef.current) {
+      fetchGroups()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

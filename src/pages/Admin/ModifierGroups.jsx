@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -37,12 +37,22 @@ export default function ModifierGroups() {
     max_select: 1,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchGroups()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchGroups = async () => {
+    if (fetchInProgressRef.current) {
+      return
+    }
+    
+    fetchInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/modifier-groups', {
@@ -51,14 +61,26 @@ export default function ModifierGroups() {
           per_page: rowsPerPage,
         },
       })
-      setGroups(response.data.data?.data || response.data.data || [])
-      setTotal(response.data.data?.total || response.data.data?.length || 0)
+      if (isMountedRef.current) {
+        setGroups(response.data.data?.data || response.data.data || [])
+        setTotal(response.data.data?.total || response.data.data?.length || 0)
+      }
     } catch (error) {
       console.error('Error fetching modifier groups:', error)
     } finally {
-      setLoading(false)
+      fetchInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchInProgressRef.current) {
+      fetchGroups()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

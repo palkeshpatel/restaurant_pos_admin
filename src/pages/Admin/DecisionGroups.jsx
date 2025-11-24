@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -33,12 +33,22 @@ export default function DecisionGroups() {
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState({ name: '' })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchGroups()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchGroups = async () => {
+    if (fetchInProgressRef.current) {
+      return
+    }
+    
+    fetchInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/decision-groups', {
@@ -48,16 +58,30 @@ export default function DecisionGroups() {
         },
       })
       const data = response.data.data || []
-      setGroups(Array.isArray(data) ? data : [])
-      setTotal(Array.isArray(data) ? data.length : 0)
+      if (isMountedRef.current) {
+        setGroups(Array.isArray(data) ? data : [])
+        setTotal(Array.isArray(data) ? data.length : 0)
+      }
     } catch (error) {
       console.error('Error fetching decision groups:', error)
-      setGroups([])
-      setTotal(0)
+      if (isMountedRef.current) {
+        setGroups([])
+        setTotal(0)
+      }
     } finally {
-      setLoading(false)
+      fetchInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchInProgressRef.current) {
+      fetchGroups()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

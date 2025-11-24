@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -41,13 +41,23 @@ export default function Decisions() {
     name: '',
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchDecisionsInProgressRef = useRef(false)
+  const fetchGroupsInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchDecisions()
-    fetchGroups()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchDecisions = async () => {
+    if (fetchDecisionsInProgressRef.current) {
+      return
+    }
+    
+    fetchDecisionsInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/decisions', {
@@ -57,27 +67,55 @@ export default function Decisions() {
         },
       })
       const data = response.data.data || []
-      setDecisions(Array.isArray(data) ? data : [])
-      setTotal(Array.isArray(data) ? data.length : 0)
+      if (isMountedRef.current) {
+        setDecisions(Array.isArray(data) ? data : [])
+        setTotal(Array.isArray(data) ? data.length : 0)
+      }
     } catch (error) {
       console.error('Error fetching decisions:', error)
-      setDecisions([])
-      setTotal(0)
+      if (isMountedRef.current) {
+        setDecisions([])
+        setTotal(0)
+      }
     } finally {
-      setLoading(false)
+      fetchDecisionsInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   const fetchGroups = async () => {
+    if (fetchGroupsInProgressRef.current) {
+      return
+    }
+    
+    fetchGroupsInProgressRef.current = true
     try {
       const response = await api.get('/admin/decision-groups')
       const data = response.data.data || []
-      setGroups(Array.isArray(data) ? data : [])
+      if (isMountedRef.current) {
+        setGroups(Array.isArray(data) ? data : [])
+      }
     } catch (error) {
       console.error('Error fetching decision groups:', error)
-      setGroups([])
+      if (isMountedRef.current) {
+        setGroups([])
+      }
+    } finally {
+      fetchGroupsInProgressRef.current = false
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchDecisionsInProgressRef.current) {
+      fetchDecisions()
+    }
+    if (isMountedRef.current && !fetchGroupsInProgressRef.current) {
+      fetchGroups()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

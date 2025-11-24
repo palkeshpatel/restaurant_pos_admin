@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -48,13 +48,23 @@ export default function MenuItems() {
     is_active: true,
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchMenuItemsInProgressRef = useRef(false)
+  const fetchCategoriesInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchMenuItems()
-    fetchCategories()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchMenuItems = async () => {
+    if (fetchMenuItemsInProgressRef.current) {
+      return
+    }
+    
+    fetchMenuItemsInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/menu-items', {
@@ -64,33 +74,60 @@ export default function MenuItems() {
         },
       })
       console.log('Menu Items API Response:', response.data)
-      // API returns { success: true, data: [...] }
       const data = response.data.data || []
-      setMenuItems(Array.isArray(data) ? data : [])
-      setTotal(Array.isArray(data) ? data.length : 0)
+      if (isMountedRef.current) {
+        setMenuItems(Array.isArray(data) ? data : [])
+        setTotal(Array.isArray(data) ? data.length : 0)
+      }
     } catch (error) {
       console.error('Error fetching menu items:', error)
       console.error('Error details:', error.response?.data)
-      setMenuItems([])
-      setTotal(0)
+      if (isMountedRef.current) {
+        setMenuItems([])
+        setTotal(0)
+      }
       if (error.response?.status === 404) {
         alert('Menu items endpoint not found. Please check the API route.')
       }
     } finally {
-      setLoading(false)
+      fetchMenuItemsInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   const fetchCategories = async () => {
+    if (fetchCategoriesInProgressRef.current) {
+      return
+    }
+    
+    fetchCategoriesInProgressRef.current = true
     try {
       const response = await api.get('/admin/menu-categories')
       const data = response.data.data || []
-      setCategories(Array.isArray(data) ? data : [])
+      if (isMountedRef.current) {
+        setCategories(Array.isArray(data) ? data : [])
+      }
     } catch (error) {
       console.error('Error fetching categories:', error)
-      setCategories([])
+      if (isMountedRef.current) {
+        setCategories([])
+      }
+    } finally {
+      fetchCategoriesInProgressRef.current = false
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchMenuItemsInProgressRef.current) {
+      fetchMenuItems()
+    }
+    if (isMountedRef.current && !fetchCategoriesInProgressRef.current) {
+      fetchCategories()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

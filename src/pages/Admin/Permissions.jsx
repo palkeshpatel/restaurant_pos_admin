@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -36,12 +36,22 @@ export default function Permissions() {
     description: '',
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchPermissions()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchPermissions = async () => {
+    if (fetchInProgressRef.current) {
+      return // Prevent duplicate calls
+    }
+    
+    fetchInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/permissions', {
@@ -50,14 +60,26 @@ export default function Permissions() {
           per_page: rowsPerPage,
         },
       })
-      setPermissions(response.data.data?.data || response.data.data || [])
-      setTotal(response.data.data?.total || response.data.data?.length || 0)
+      if (isMountedRef.current) {
+        setPermissions(response.data.data?.data || response.data.data || [])
+        setTotal(response.data.data?.total || response.data.data?.length || 0)
+      }
     } catch (error) {
       console.error('Error fetching permissions:', error)
     } finally {
-      setLoading(false)
+      fetchInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchInProgressRef.current) {
+      fetchPermissions()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)

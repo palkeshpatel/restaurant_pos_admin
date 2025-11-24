@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Typography,
@@ -44,13 +44,23 @@ export default function Tables() {
     status: 'available',
   })
   const [error, setError] = useState('')
+  const isMountedRef = useRef(true)
+  const fetchTablesInProgressRef = useRef(false)
+  const fetchFloorsInProgressRef = useRef(false)
 
   useEffect(() => {
-    fetchTables()
-    fetchFloors()
-  }, [page, rowsPerPage])
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchTables = async () => {
+    if (fetchTablesInProgressRef.current) {
+      return
+    }
+    
+    fetchTablesInProgressRef.current = true
     setLoading(true)
     try {
       const response = await api.get('/admin/tables', {
@@ -59,23 +69,47 @@ export default function Tables() {
           per_page: rowsPerPage,
         },
       })
-      setTables(response.data.data?.data || response.data.data || [])
-      setTotal(response.data.data?.total || response.data.data?.length || 0)
+      if (isMountedRef.current) {
+        setTables(response.data.data?.data || response.data.data || [])
+        setTotal(response.data.data?.total || response.data.data?.length || 0)
+      }
     } catch (error) {
       console.error('Error fetching tables:', error)
     } finally {
-      setLoading(false)
+      fetchTablesInProgressRef.current = false
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   const fetchFloors = async () => {
+    if (fetchFloorsInProgressRef.current) {
+      return
+    }
+    
+    fetchFloorsInProgressRef.current = true
     try {
       const response = await api.get('/admin/floors')
-      setFloors(response.data.data?.data || response.data.data || [])
+      if (isMountedRef.current) {
+        setFloors(response.data.data?.data || response.data.data || [])
+      }
     } catch (error) {
       console.error('Error fetching floors:', error)
+    } finally {
+      fetchFloorsInProgressRef.current = false
     }
   }
+
+  useEffect(() => {
+    if (isMountedRef.current && !fetchTablesInProgressRef.current) {
+      fetchTables()
+    }
+    if (isMountedRef.current && !fetchFloorsInProgressRef.current) {
+      fetchFloors()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage])
 
   const handleOpenAdd = () => {
     setEditingItem(null)
@@ -293,5 +327,6 @@ export default function Tables() {
     </Box>
   )
 }
+
 
 

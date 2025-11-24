@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import api from '../services/api'
 
 const AuthContext = createContext(null)
@@ -6,18 +6,25 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const fetchUserInProgressRef = useRef(false)
+  const hasFetchedRef = useRef(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (token) {
+    if (token && !hasFetchedRef.current) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       fetchUser()
-    } else {
+    } else if (!token) {
       setLoading(false)
     }
   }, [])
 
   const fetchUser = async () => {
+    if (fetchUserInProgressRef.current || hasFetchedRef.current) {
+      return // Prevent duplicate calls
+    }
+    
+    fetchUserInProgressRef.current = true
     try {
       const response = await api.get('/auth/me')
       // Handle different response structures
@@ -25,12 +32,14 @@ export function AuthProvider({ children }) {
       console.log('API Response:', response.data)
       console.log('User Data:', userData)
       setUser(userData)
+      hasFetchedRef.current = true
     } catch (error) {
       console.error('Error fetching user:', error)
       localStorage.removeItem('token')
       delete api.defaults.headers.common['Authorization']
       setUser(null)
     } finally {
+      fetchUserInProgressRef.current = false
       setLoading(false)
     }
   }

@@ -1,4 +1,6 @@
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+'use client'
+
+import { useRouter, usePathname } from 'next/navigation'
 import {
   Box,
   Drawer,
@@ -33,9 +35,9 @@ import { useAuth } from '../contexts/AuthContext'
 
 const drawerWidth = 240
 
-export default function Layout() {
-  const navigate = useNavigate()
-  const location = useLocation()
+export default function Layout({ children }) {
+  const router = useRouter()
+  const pathname = usePathname()
   const { user, logout } = useAuth()
   const [anchorEl, setAnchorEl] = useState(null)
   const [menuManagementOpen, setMenuManagementOpen] = useState(true)
@@ -64,7 +66,7 @@ export default function Layout() {
   ]
 
   const isMenuManagementActive = menuManagementItems.some(
-    (item) => location.pathname === item.path
+    (item) => pathname === item.path
   )
 
   // Auto-open menu management if on one of its pages
@@ -72,7 +74,7 @@ export default function Layout() {
     if (isMenuManagementActive && !menuManagementOpen) {
       setMenuManagementOpen(true)
     }
-  }, [location.pathname, isMenuManagementActive, menuManagementOpen])
+  }, [pathname, isMenuManagementActive, menuManagementOpen])
 
   const menuItems = isSuperAdmin
     ? [
@@ -103,7 +105,7 @@ export default function Layout() {
 
   const handleLogout = async () => {
     await logout()
-    navigate('/login')
+    router.push('/login')
     handleMenuClose()
   }
 
@@ -159,8 +161,8 @@ export default function Layout() {
             {menuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  selected={location.pathname === item.path}
-                  onClick={() => navigate(item.path)}
+                  selected={pathname === item.path}
+                  onClick={() => router.push(item.path)}
                 >
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
@@ -187,8 +189,8 @@ export default function Layout() {
                     {menuManagementItems.map((item) => (
                       <ListItem key={item.text} disablePadding>
                         <ListItemButton
-                          selected={location.pathname === item.path}
-                          onClick={() => navigate(item.path)}
+                          selected={pathname === item.path}
+                          onClick={() => router.push(item.path)}
                           sx={{ pl: 4 }}
                         >
                           <ListItemIcon>{item.icon}</ListItemIcon>
@@ -213,7 +215,7 @@ export default function Layout() {
         }}
       >
         <Toolbar />
-        <Outlet />
+        {children}
       </Box>
     </Box>
   )

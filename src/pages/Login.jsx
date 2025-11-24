@@ -1,5 +1,7 @@
+'use client'
+
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import {
   Container,
   Box,
@@ -23,7 +25,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
-  const navigate = useNavigate()
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,7 +36,7 @@ export default function Login() {
     setLoading(false)
 
     if (result.success) {
-      navigate('/dashboard')
+      router.push('/dashboard')
     } else {
       setError(result.message)
     }

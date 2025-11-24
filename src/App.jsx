@@ -15,6 +15,8 @@ import AdminMenuCategories from './pages/Admin/MenuCategories'
 import AdminMenuItems from './pages/Admin/MenuItems'
 import AdminModifierGroups from './pages/Admin/ModifierGroups'
 import AdminModifiers from './pages/Admin/Modifiers'
+import AdminDecisionGroups from './pages/Admin/DecisionGroups'
+import AdminDecisions from './pages/Admin/Decisions'
 import AdminTaxRates from './pages/Admin/TaxRates'
 import AdminPrinters from './pages/Admin/Printers'
 import Layout from './components/Layout'
@@ -94,6 +96,8 @@ function App() {
         <Route path="admin/menu-items" element={<AdminMenuItems />} />
         <Route path="admin/modifier-groups" element={<AdminModifierGroups />} />
         <Route path="admin/modifiers" element={<AdminModifiers />} />
+        <Route path="admin/decision-groups" element={<AdminDecisionGroups />} />
+        <Route path="admin/decisions" element={<AdminDecisions />} />
         <Route path="admin/tax-rates" element={<AdminTaxRates />} />
         <Route path="admin/printers" element={<AdminPrinters />} />
       </Route>

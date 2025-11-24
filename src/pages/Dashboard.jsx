@@ -39,6 +39,8 @@ export default function Dashboard() {
     menuItems: 0,
     modifierGroups: 0,
     modifiers: 0,
+    decisionGroups: 0,
+    decisions: 0,
     taxRates: 0,
     printers: 0,
   })
@@ -84,6 +86,8 @@ export default function Dashboard() {
         menuItemsRes,
         modifierGroupsRes,
         modifiersRes,
+        decisionGroupsRes,
+        decisionsRes,
         taxRatesRes,
         printersRes,
       ] = await Promise.all([
@@ -98,6 +102,8 @@ export default function Dashboard() {
         api.get('/admin/menu-items').catch(() => ({ data: { data: [] } })),
         api.get('/admin/modifier-groups').catch(() => ({ data: { data: [] } })),
         api.get('/admin/modifiers').catch(() => ({ data: { data: [] } })),
+        api.get('/admin/decision-groups').catch(() => ({ data: { data: [] } })),
+        api.get('/admin/decisions').catch(() => ({ data: { data: [] } })),
         api.get('/admin/taxes').catch(() => ({ data: { data: [] } })),
         api.get('/admin/printers').catch(() => ({ data: { data: [] } })),
       ])
@@ -119,6 +125,8 @@ export default function Dashboard() {
         menuItems: getCount(menuItemsRes),
         modifierGroups: getCount(modifierGroupsRes),
         modifiers: getCount(modifiersRes),
+        decisionGroups: getCount(decisionGroupsRes),
+        decisions: getCount(decisionsRes),
         taxRates: getCount(taxRatesRes),
         printers: getCount(printersRes),
       })
@@ -459,6 +467,54 @@ export default function Dashboard() {
                       ) : (
                         <Typography variant="h4" color="primary.main">
                           {counts.modifiers}
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardActionArea onClick={() => navigate('/admin/decision-groups')}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box>
+                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                        <Typography variant="h6">Decision Groups</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Manage decision groups
+                        </Typography>
+                      </Box>
+                      {loading ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        <Typography variant="h4" color="primary.main">
+                          {counts.decisionGroups}
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardActionArea onClick={() => navigate('/admin/decisions')}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box>
+                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                        <Typography variant="h6">Decisions</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Manage decisions
+                        </Typography>
+                      </Box>
+                      {loading ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        <Typography variant="h4" color="primary.main">
+                          {counts.decisions}
                         </Typography>
                       )}
                     </Box>

@@ -17,6 +17,9 @@ import {
   Menu,
   MenuItem,
   Collapse,
+  IconButton,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
@@ -39,6 +42,9 @@ export default function Layout({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
   const [menuManagementOpen, setMenuManagementOpen] = useState(true)
 
@@ -103,27 +109,109 @@ export default function Layout({ children }) {
     setAnchorEl(null)
   }
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
+
   const handleLogout = async () => {
     await logout()
     router.push('/login')
     handleMenuClose()
   }
 
+  const drawer = (
+    <Box>
+      <Toolbar />
+      <Box sx={{ overflow: 'auto' }}>
+        <List>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                selected={pathname === item.path}
+                onClick={() => {
+                  router.push(item.path)
+                  if (isMobile) {
+                    setMobileOpen(false)
+                  }
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+          
+          {!isSuperAdmin && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={isMenuManagementActive}
+                  onClick={() => setMenuManagementOpen(!menuManagementOpen)}
+                >
+                  <ListItemIcon>
+                    <RestaurantIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Menu Management" />
+                  {menuManagementOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={menuManagementOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {menuManagementItems.map((item) => (
+                    <ListItem key={item.text} disablePadding>
+                      <ListItemButton
+                        selected={pathname === item.path}
+                        onClick={() => {
+                          router.push(item.path)
+                          if (isMobile) {
+                            setMobileOpen(false)
+                          }
+                        }}
+                        sx={{ pl: 4 }}
+                      >
+                        <ListItemIcon>{item.icon}</ListItemIcon>
+                        <ListItemText primary={item.text} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
+        </List>
+      </Box>
+    </Box>
+  )
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
+        }}
       >
         <Toolbar>
-          <MenuIcon sx={{ mr: 2 }} />
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Restaurant POS Admin
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">{user?.name || user?.email}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+            <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              {user?.name || user?.email}
+            </Typography>
             <Avatar
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: 'pointer', width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}
               onClick={handleMenuOpen}
               src={user?.avatar}
             >
@@ -144,74 +232,50 @@ export default function Layout({ children }) {
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
+      <Box
+        component="nav"
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        aria-label="navigation"
       >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  selected={pathname === item.path}
-                  onClick={() => router.push(item.path)}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-            
-            {!isSuperAdmin && (
-              <>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    selected={isMenuManagementActive}
-                    onClick={() => setMenuManagementOpen(!menuManagementOpen)}
-                  >
-                    <ListItemIcon>
-                      <RestaurantIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Menu Management" />
-                    {menuManagementOpen ? <ExpandLess /> : <ExpandMore />}
-                  </ListItemButton>
-                </ListItem>
-                <Collapse in={menuManagementOpen} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {menuManagementItems.map((item) => (
-                      <ListItem key={item.text} disablePadding>
-                        <ListItemButton
-                          selected={pathname === item.path}
-                          onClick={() => router.push(item.path)}
-                          sx={{ pl: 4 }}
-                        >
-                          <ListItemIcon>{item.icon}</ListItemIcon>
-                          <ListItemText primary={item.text} />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </>
-            )}
-          </List>
-        </Box>
-      </Drawer>
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           bgcolor: 'background.default',
-          p: 3,
+          p: { xs: 1, sm: 2, md: 3 },
           minHeight: '100vh',
+          width: { md: `calc(100% - ${drawerWidth}px)` },
         }}
       >
         <Toolbar />

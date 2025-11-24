@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Box, Typography, Grid, Card, CardContent, Paper, CardActionArea, CircularProgress } from '@mui/material'
+import { Box, Typography, Grid, Card, CardContent, Paper, CardActionArea, CircularProgress, useMediaQuery, useTheme } from '@mui/material'
 import {
   Business as BusinessIcon,
   People as PeopleIcon,
@@ -23,6 +23,8 @@ import api from '../services/api'
 export default function Dashboard() {
   const { user } = useAuth()
   const router = useRouter()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isSuperAdmin = user?.is_super_admin
   const [businessCount, setBusinessCount] = useState(0)
   const [userCount, setUserCount] = useState(0)

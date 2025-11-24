@@ -21,11 +21,15 @@ import {
   CircularProgress,
   Switch,
   FormControlLabel,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
 import api from '../../services/api'
 
 export default function Employees() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
@@ -158,15 +162,35 @@ export default function Employees() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', sm: 'center' }, 
+          mb: 2,
+          gap: { xs: 2, sm: 0 }
+        }}
+      >
         <Typography variant="h4">Employees</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd}>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={handleOpenAdd}
+          fullWidth={{ xs: true, sm: false }}
+        >
           Add New Employee
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer 
+        component={Paper}
+        sx={{
+          overflowX: 'auto',
+          maxWidth: '100%',
+        }}
+      >
+        <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
@@ -232,7 +256,13 @@ export default function Employees() {
         rowsPerPageOptions={[5, 10, 25, 50]}
       />
 
-      <Dialog open={openDialog} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleClose} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} Employee</DialogTitle>
         <DialogContent>
           {error && (

@@ -16,6 +16,9 @@ import {
   DialogActions,
   TextField,
   Alert,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
 import { useState } from 'react'
@@ -37,6 +40,8 @@ export default function DataTable({
   formFields,
   initialFormData,
 }) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [openDialog, setOpenDialog] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState(initialFormData || {})
@@ -83,19 +88,41 @@ export default function DataTable({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <h2>{title}</h2>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd}>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', sm: 'center' }, 
+          mb: 2,
+          gap: { xs: 2, sm: 0 }
+        }}
+      >
+        <Typography variant="h4" component="h2">{title}</Typography>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={handleOpenAdd}
+          fullWidth={isMobile}
+        >
           Add New
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer 
+        component={Paper}
+        sx={{
+          overflowX: 'auto',
+          maxWidth: '100%',
+        }}
+      >
+        <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                <TableCell key={col.field}>{col.label}</TableCell>
+                <TableCell key={col.field} sx={{ whiteSpace: { xs: 'nowrap', sm: 'normal' } }}>
+                  {col.label}
+                </TableCell>
               ))}
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -126,12 +153,23 @@ export default function DataTable({
                     ))
                   )}
                   <TableCell>
-                    <IconButton size="small" onClick={() => handleOpenEdit(item)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => onDelete(item.id)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
+                    <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
+                      <IconButton 
+                        size={isMobile ? "small" : "medium"} 
+                        onClick={() => handleOpenEdit(item)}
+                        aria-label="edit"
+                      >
+                        <EditIcon fontSize={isMobile ? "small" : "medium"} />
+                      </IconButton>
+                      <IconButton 
+                        size={isMobile ? "small" : "medium"} 
+                        onClick={() => onDelete(item.id)} 
+                        color="error"
+                        aria-label="delete"
+                      >
+                        <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -148,9 +186,22 @@ export default function DataTable({
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={(e) => onRowsPerPageChange(parseInt(e.target.value, 10))}
         rowsPerPageOptions={[5, 10, 25, 50]}
+        labelRowsPerPage={isMobile ? "Rows:" : "Rows per page:"}
+        sx={{
+          overflowX: 'auto',
+          '& .MuiTablePagination-toolbar': {
+            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          },
+        }}
       />
 
-      <Dialog open={openDialog} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleClose} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} {title}</DialogTitle>
         <DialogContent>
           {error && (

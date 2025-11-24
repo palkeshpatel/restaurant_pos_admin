@@ -43,20 +43,29 @@ export default function Login() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container 
+      component="main" 
+      maxWidth="xs"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: { xs: 2, sm: 4 },
+      }}
+    >
       <Box
         sx={{
-          marginTop: 8,
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
         }}
       >
-        <RestaurantIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-        <Typography component="h1" variant="h4" gutterBottom>
+        <RestaurantIcon sx={{ fontSize: { xs: 48, sm: 60 }, color: 'primary.main', mb: 2 }} />
+        <Typography component="h1" variant="h4" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
           Restaurant POS Admin
         </Typography>
-        <Card sx={{ width: '100%', mt: 3 }}>
+        <Card sx={{ width: '100%', mt: { xs: 2, sm: 3 } }}>
           <CardContent>
             <Typography component="h2" variant="h6" gutterBottom>
               Sign In

@@ -1,20 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Box, Typography, Grid, Card, CardContent, Paper, CardActionArea, CircularProgress, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Typography, Grid, Card, CardContent, CardActionArea, CircularProgress, useMediaQuery, useTheme } from '@mui/material'
 import {
   Business as BusinessIcon,
   People as PeopleIcon,
-  Restaurant as RestaurantIcon,
-  TableRestaurant as TableIcon,
-  Security as SecurityIcon,
-  LocalOffer as DiscountIcon,
-  Layers as FloorIcon,
-  MenuBook as MenuBookIcon,
-  Category as CategoryIcon,
-  Settings as SettingsIcon,
-  Print as PrintIcon,
-  AttachMoney as MoneyIcon,
+  ShoppingCart as OrderIcon,
+  CheckCircle as ClosedOrderIcon,
+  RadioButtonUnchecked as OpenOrderIcon,
 } from '@mui/icons-material'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
@@ -33,20 +26,9 @@ export default function Dashboard() {
   // Business Admin counts
   const [counts, setCounts] = useState({
     employees: 0,
-    roles: 0,
-    permissions: 0,
-    discountReasons: 0,
-    floors: 0,
-    tables: 0,
-    menus: 0,
-    menuCategories: 0,
-    menuItems: 0,
-    modifierGroups: 0,
-    modifiers: 0,
-    decisionGroups: 0,
-    decisions: 0,
-    taxRates: 0,
-    printers: 0,
+    orders: 0,
+    openOrders: 0,
+    closedOrders: 0,
   })
 
   useEffect(() => {
@@ -78,64 +60,17 @@ export default function Dashboard() {
 
   const fetchBusinessAdminCounts = async () => {
     try {
-      const [
-        employeesRes,
-        rolesRes,
-        permissionsRes,
-        discountReasonsRes,
-        floorsRes,
-        tablesRes,
-        menusRes,
-        menuCategoriesRes,
-        menuItemsRes,
-        modifierGroupsRes,
-        modifiersRes,
-        decisionGroupsRes,
-        decisionsRes,
-        taxRatesRes,
-        printersRes,
-      ] = await Promise.all([
-        api.get('/admin/employees').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/roles').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/permissions').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/discount-reasons').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/floors').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/tables').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/menus').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/menu-categories').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/menu-items').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/modifier-groups').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/modifiers').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/decision-groups').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/decisions').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/taxes').catch(() => ({ data: { data: [] } })),
-        api.get('/admin/printers').catch(() => ({ data: { data: [] } })),
-      ])
-
-      const getCount = (response) => {
-        const data = response.data.data?.data || response.data.data || []
-        return data.length || response.data.data?.total || 0
-      }
-
+      const response = await api.get('/admin/dashboard/counts')
+      const countsData = response.data.data || response.data || {}
+      
       setCounts({
-        employees: getCount(employeesRes),
-        roles: getCount(rolesRes),
-        permissions: getCount(permissionsRes),
-        discountReasons: getCount(discountReasonsRes),
-        floors: getCount(floorsRes),
-        tables: getCount(tablesRes),
-        menus: getCount(menusRes),
-        menuCategories: getCount(menuCategoriesRes),
-        menuItems: getCount(menuItemsRes),
-        modifierGroups: getCount(modifierGroupsRes),
-        modifiers: getCount(modifiersRes),
-        decisionGroups: getCount(decisionGroupsRes),
-        decisions: getCount(decisionsRes),
-        taxRates: getCount(taxRatesRes),
-        printers: getCount(printersRes),
+        employees: countsData.employees || 0,
+        orders: countsData.orders || 0,
+        openOrders: countsData.open_orders || 0,
+        closedOrders: countsData.closed_orders || 0,
       })
     } catch (error) {
-      console.error('Error fetching business admin counts:', error)
+      console.error('Error fetching dashboard counts:', error)
     } finally {
       setLoading(false)
     }
@@ -143,22 +78,24 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Typography variant="body1" color="text.secondary" gutterBottom>
-        Welcome back, {user?.name || user?.email}!
-      </Typography>
-      {isSuperAdmin && (
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Super Admin - Manage Businesses and Users
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold">
+          Dashboard
         </Typography>
-      )}
-      {!isSuperAdmin && user?.business && (
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Business: {user.business.name}
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          Welcome back, {user?.name || user?.email}!
         </Typography>
-      )}
+        {isSuperAdmin && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Super Admin - Manage Businesses and Users
+          </Typography>
+        )}
+        {!isSuperAdmin && user?.business && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Business: <strong>{user.business.name}</strong>
+          </Typography>
+        )}
+      </Box>
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
         {isSuperAdmin ? (
@@ -215,21 +152,21 @@ export default function Dashboard() {
         ) : (
           <>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/employees')}>
+              <Card sx={{ height: '100%' }}>
+                <CardActionArea onClick={() => router.push('/admin/employees')} sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <PeopleIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Employees</Typography>
+                        <PeopleIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                        <Typography variant="h6" fontWeight="bold">Employees</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Manage employees
+                          Total employees
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={32} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
+                        <Typography variant="h3" color="primary.main" fontWeight="bold">
                           {counts.employees}
                         </Typography>
                       )}
@@ -239,22 +176,22 @@ export default function Dashboard() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/roles')}>
+              <Card sx={{ height: '100%' }}>
+                <CardActionArea sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Roles</Typography>
+                        <OrderIcon sx={{ fontSize: 48, color: 'info.main', mb: 1 }} />
+                        <Typography variant="h6" fontWeight="bold">Total Orders</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Manage roles
+                          All orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={32} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.roles}
+                        <Typography variant="h3" color="info.main" fontWeight="bold">
+                          {counts.orders}
                         </Typography>
                       )}
                     </Box>
@@ -263,22 +200,22 @@ export default function Dashboard() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/permissions')}>
+              <Card sx={{ height: '100%', border: '2px solid', borderColor: 'success.main' }}>
+                <CardActionArea sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Permissions</Typography>
+                        <OpenOrderIcon sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+                        <Typography variant="h6" fontWeight="bold">Open Orders</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Manage permissions
+                          Active orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={32} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.permissions}
+                        <Typography variant="h3" color="success.main" fontWeight="bold">
+                          {counts.openOrders}
                         </Typography>
                       )}
                     </Box>
@@ -287,286 +224,22 @@ export default function Dashboard() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/discount-reasons')}>
+              <Card sx={{ height: '100%', border: '2px solid', borderColor: 'grey.400' }}>
+                <CardActionArea sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <DiscountIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Discount Reasons</Typography>
+                        <ClosedOrderIcon sx={{ fontSize: 48, color: 'grey.600', mb: 1 }} />
+                        <Typography variant="h6" fontWeight="bold">Closed Orders</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Manage discounts
+                          Completed orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={32} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.discountReasons}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/floors')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <FloorIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Floors</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage floors
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.floors}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/tables')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <TableIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Tables</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage tables
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.tables}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/menus')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <MenuBookIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Menus</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage menus
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.menus}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/menu-categories')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <CategoryIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Menu Categories</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage categories
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.menuCategories}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/menu-items')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <RestaurantIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Menu Items</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage menu items
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.menuItems}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/modifier-groups')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <SettingsIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Modifier Groups</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage modifier groups
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.modifierGroups}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/modifiers')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <SettingsIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Modifiers</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage modifiers
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.modifiers}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/decision-groups')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Decision Groups</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage decision groups
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.decisionGroups}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/decisions')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <SecurityIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Decisions</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage decisions
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.decisions}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/tax-rates')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <MoneyIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Tax Rates</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage tax rates
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.taxRates}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardActionArea onClick={() => router.push('/admin/printers')}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box>
-                        <PrintIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Printers</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Manage printers
-                        </Typography>
-                      </Box>
-                      {loading ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Typography variant="h4" color="primary.main">
-                          {counts.printers}
+                        <Typography variant="h3" color="grey.600" fontWeight="bold">
+                          {counts.closedOrders}
                         </Typography>
                       )}
                     </Box>

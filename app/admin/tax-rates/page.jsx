@@ -1,6 +1,10 @@
 'use client'
 
-import AdminTaxRates from '../../../src/pages/Admin/TaxRates'
+import dynamic from 'next/dynamic'
+
+const AdminTaxRates = dynamic(() => import('../../../src/pages/Admin/TaxRates'), {
+  ssr: false,
+})
 
 export default function TaxRatesPage() {
   return <AdminTaxRates />

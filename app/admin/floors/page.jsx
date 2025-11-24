@@ -1,6 +1,10 @@
 'use client'
 
-import AdminFloors from '../../../src/pages/Admin/Floors'
+import dynamic from 'next/dynamic'
+
+const AdminFloors = dynamic(() => import('../../../src/pages/Admin/Floors'), {
+  ssr: false,
+})
 
 export default function FloorsPage() {
   return <AdminFloors />

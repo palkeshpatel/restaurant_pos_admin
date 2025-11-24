@@ -1,28 +1,31 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../src/contexts/AuthContext'
-import Layout from '../../src/components/Layout'
+import dynamic from 'next/dynamic'
+
+// Dynamically import Layout to reduce initial bundle size
+const Layout = dynamic(() => import('../../src/components/Layout'), {
+  ssr: false,
+  loading: () => <div>Loading...</div>
+})
 
 export default function AdminLayout({ children }) {
   const router = useRouter()
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/login')
-      }
+    if (!loading && !user) {
+      router.push('/login')
     }
   }, [user, loading, router])
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
+  // Memoize to prevent unnecessary re-renders
+  const shouldRender = useMemo(() => !loading && user, [loading, user])
 
-  if (!user) {
-    return null
+  if (!shouldRender) {
+    return <div>Loading...</div>
   }
 
   return (

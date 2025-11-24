@@ -8,7 +8,10 @@ import { theme } from '../lib/theme'
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body style={{ margin: 0, padding: 0 }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <AuthProvider>

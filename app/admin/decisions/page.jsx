@@ -1,6 +1,10 @@
 'use client'
 
-import AdminDecisions from '../../../src/pages/Admin/Decisions'
+import dynamic from 'next/dynamic'
+
+const AdminDecisions = dynamic(() => import('../../../src/pages/Admin/Decisions'), {
+  ssr: false,
+})
 
 export default function DecisionsPage() {
   return <AdminDecisions />

@@ -1,6 +1,10 @@
 'use client'
 
-import AdminPermissions from '../../../src/pages/Admin/Permissions'
+import dynamic from 'next/dynamic'
+
+const AdminPermissions = dynamic(() => import('../../../src/pages/Admin/Permissions'), {
+  ssr: false,
+})
 
 export default function PermissionsPage() {
   return <AdminPermissions />

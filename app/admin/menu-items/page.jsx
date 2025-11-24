@@ -1,6 +1,10 @@
 'use client'
 
-import AdminMenuItems from '../../../src/pages/Admin/MenuItems'
+import dynamic from 'next/dynamic'
+
+const AdminMenuItems = dynamic(() => import('../../../src/pages/Admin/MenuItems'), {
+  ssr: false,
+})
 
 export default function MenuItemsPage() {
   return <AdminMenuItems />

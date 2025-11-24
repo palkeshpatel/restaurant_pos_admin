@@ -1,6 +1,10 @@
 'use client'
 
-import AdminModifiers from '../../../src/pages/Admin/Modifiers'
+import dynamic from 'next/dynamic'
+
+const AdminModifiers = dynamic(() => import('../../../src/pages/Admin/Modifiers'), {
+  ssr: false,
+})
 
 export default function ModifiersPage() {
   return <AdminModifiers />

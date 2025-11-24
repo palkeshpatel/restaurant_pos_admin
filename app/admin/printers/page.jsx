@@ -1,6 +1,10 @@
 'use client'
 
-import AdminPrinters from '../../../src/pages/Admin/Printers'
+import dynamic from 'next/dynamic'
+
+const AdminPrinters = dynamic(() => import('../../../src/pages/Admin/Printers'), {
+  ssr: false,
+})
 
 export default function PrintersPage() {
   return <AdminPrinters />

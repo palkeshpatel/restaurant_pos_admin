@@ -1,6 +1,10 @@
 'use client'
 
-import AdminMenuCategories from '../../../src/pages/Admin/MenuCategories'
+import dynamic from 'next/dynamic'
+
+const AdminMenuCategories = dynamic(() => import('../../../src/pages/Admin/MenuCategories'), {
+  ssr: false,
+})
 
 export default function MenuCategoriesPage() {
   return <AdminMenuCategories />

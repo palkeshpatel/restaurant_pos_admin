@@ -23,8 +23,14 @@ import {
   FormControlLabel,
   useMediaQuery,
   useTheme,
+  InputAdornment,
+  Avatar,
+  Snackbar,
+  Fade,
+  Grow,
+  Backdrop,
 } from '@mui/material'
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Visibility, VisibilityOff, Warning as WarningIcon } from '@mui/icons-material'
 import api from '../../services/api'
 
 export default function Employees() {
@@ -45,7 +51,15 @@ export default function Employees() {
     image: '',
     is_active: true,
   })
+  const [showPin, setShowPin] = useState(false)
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState('')
   const [error, setError] = useState('')
+  const [submitLoading, setSubmitLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [employeeToDelete, setEmployeeToDelete] = useState(null)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
   const isMountedRef = useRef(true)
   const fetchInProgressRef = useRef(false)
 
@@ -107,6 +121,9 @@ export default function Employees() {
       image: '',
       is_active: true,
     })
+    setAvatarFile(null)
+    setAvatarPreview('')
+    setShowPin(false)
     setError('')
     setOpenDialog(true)
   }
@@ -118,9 +135,12 @@ export default function Employees() {
       last_name: item.last_name || '',
       email: item.email || '',
       pin4: item.pin4 || '',
-      image: item.image || '',
+      image: item.image || item.avatar || '',
       is_active: item.is_active !== undefined ? item.is_active : true,
     })
+    setAvatarFile(null)
+    setAvatarPreview(item.avatar || item.image || '')
+    setShowPin(false)
     setError('')
     setOpenDialog(true)
   }
@@ -136,34 +156,97 @@ export default function Employees() {
       image: '',
       is_active: true,
     })
+    setAvatarFile(null)
+    setAvatarPreview('')
+    setShowPin(false)
     setError('')
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setAvatarFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   const handleSubmit = async () => {
     setError('')
+    setSubmitLoading(true)
     try {
-      if (editingItem) {
-        await api.put(`/admin/employees/${editingItem.id}`, formData)
+      let submitData
+      
+      // If there's a file, use FormData, otherwise use regular JSON
+      if (avatarFile) {
+        submitData = new FormData()
+        submitData.append('first_name', formData.first_name)
+        submitData.append('last_name', formData.last_name)
+        submitData.append('email', formData.email)
+        submitData.append('pin4', formData.pin4)
+        submitData.append('is_active', formData.is_active ? 1 : 0)
+        submitData.append('avatar', avatarFile)
       } else {
-        await api.post('/admin/employees', formData)
+        submitData = { ...formData }
+        if (formData.image && !avatarFile) {
+          submitData.avatar = formData.image
+        }
+      }
+
+      if (editingItem) {
+        await api.put(`/admin/employees/${editingItem.id}`, submitData, {
+          headers: avatarFile ? { 'Content-Type': 'multipart/form-data' } : {}
+        })
+        setSnackbar({ open: true, message: 'Employee updated successfully!', severity: 'success' })
+      } else {
+        await api.post('/admin/employees', submitData, {
+          headers: avatarFile ? { 'Content-Type': 'multipart/form-data' } : {}
+        })
+        setSnackbar({ open: true, message: 'Employee created successfully!', severity: 'success' })
       }
       handleClose()
       fetchEmployees()
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred')
+      setSnackbar({ open: true, message: err.response?.data?.message || 'An error occurred', severity: 'error' })
+    } finally {
+      setSubmitLoading(false)
     }
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this employee?')) {
-      try {
-        await api.delete(`/admin/employees/${id}`)
-        fetchEmployees()
-      } catch (error) {
-        console.error('Error deleting employee:', error)
-        alert('Failed to delete employee')
-      }
+  const handleDeleteClick = (employee) => {
+    setEmployeeToDelete(employee)
+    setDeleteConfirmOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!employeeToDelete) return
+    
+    setDeleteLoading(true)
+    setDeleteConfirmOpen(false)
+    try {
+      await api.delete(`/admin/employees/${employeeToDelete.id}`)
+      setSnackbar({ open: true, message: 'Employee deleted successfully!', severity: 'success' })
+      fetchEmployees()
+    } catch (error) {
+      console.error('Error deleting employee:', error)
+      setSnackbar({ open: true, message: 'Failed to delete employee', severity: 'error' })
+    } finally {
+      setDeleteLoading(false)
+      setEmployeeToDelete(null)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false)
+    setEmployeeToDelete(null)
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false })
   }
 
   return (
@@ -220,6 +303,13 @@ export default function Employees() {
                 fontWeight: 600,
                 py: { xs: 1, sm: 1.5 }
               }}>
+                Avatar
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
                 Name
               </TableCell>
               <TableCell sx={{ 
@@ -255,24 +345,65 @@ export default function Employees() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <CircularProgress />
+                <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                  <CircularProgress size={40} />
+                  <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+                    Loading employees...
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : employees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   No employees found
                 </TableCell>
               </TableRow>
             ) : (
-              employees.map((employee) => (
-                <TableRow key={employee.id}>
+              employees.map((employee, index) => (
+                <TableRow 
+                  key={employee.id}
+                  sx={{
+                    animation: `fadeIn 0.3s ease-out ${index * 0.05}s both`,
+                    '@keyframes fadeIn': {
+                      from: {
+                        opacity: 0,
+                        transform: 'translateY(10px)',
+                      },
+                      to: {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                      transition: 'background-color 0.2s ease-in-out',
+                    },
+                  }}
+                >
                   <TableCell sx={{ 
                     fontSize: { xs: '0.75rem', sm: '0.875rem' },
                     py: { xs: 1, sm: 1.5 }
                   }}>
                     {employee.id}
+                  </TableCell>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
+                    <Avatar 
+                      src={employee.avatar || employee.image || ''} 
+                      alt={`${employee.first_name} ${employee.last_name}`}
+                      sx={{ 
+                        width: 40, 
+                        height: 40,
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                        },
+                      }}
+                    >
+                      {employee.first_name?.[0]?.toUpperCase() || 'N'}
+                    </Avatar>
                   </TableCell>
                   <TableCell sx={{ 
                     fontSize: { xs: '0.75rem', sm: '0.875rem' },
@@ -303,17 +434,34 @@ export default function Employees() {
                       <IconButton 
                         size={isMobile ? "small" : "medium"} 
                         onClick={() => handleOpenEdit(employee)}
-                        sx={{ padding: { xs: '4px', sm: '8px' } }}
+                        sx={{ 
+                          padding: { xs: '4px', sm: '8px' },
+                          transition: 'transform 0.2s ease-in-out',
+                          '&:hover': {
+                            transform: 'scale(1.1)',
+                          }
+                        }}
                       >
                         <EditIcon fontSize={isMobile ? "small" : "medium"} />
                       </IconButton>
                       <IconButton
                         size={isMobile ? "small" : "medium"}
-                        onClick={() => handleDelete(employee.id)}
+                        onClick={() => handleDeleteClick(employee)}
                         color="error"
-                        sx={{ padding: { xs: '4px', sm: '8px' } }}
+                        disabled={deleteLoading}
+                        sx={{ 
+                          padding: { xs: '4px', sm: '8px' },
+                          transition: 'transform 0.2s ease-in-out',
+                          '&:hover': {
+                            transform: 'scale(1.1)',
+                          }
+                        }}
                       >
-                        <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                        {deleteLoading && employee.id === employeeToDelete?.id ? (
+                          <CircularProgress size={20} color="error" />
+                        ) : (
+                          <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                        )}
                       </IconButton>
                     </Box>
                   </TableCell>
@@ -343,6 +491,23 @@ export default function Employees() {
         maxWidth="sm" 
         fullWidth
         fullScreen={isMobile}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 300 }}
+        PaperProps={{
+          sx: {
+            animation: 'slideIn 0.3s ease-out',
+            '@keyframes slideIn': {
+              from: {
+                opacity: 0,
+                transform: 'translateY(-20px) scale(0.95)',
+              },
+              to: {
+                opacity: 1,
+                transform: 'translateY(0) scale(1)',
+              },
+            },
+          },
+        }}
       >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} Employee</DialogTitle>
         <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
@@ -391,20 +556,62 @@ export default function Employees() {
             label="PIN (4 digits)"
             fullWidth
             variant="outlined"
+            type={showPin ? 'text' : 'password'}
             value={formData.pin4}
             onChange={(e) => setFormData({ ...formData, pin4: e.target.value })}
             inputProps={{ maxLength: 4 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPin(!showPin)}
+                    edge="end"
+                  >
+                    {showPin ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
             sx={{ mb: 2 }}
           />
-          <TextField
-            margin="dense"
-            label="Image URL"
-            fullWidth
-            variant="outlined"
-            value={formData.image}
-            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-            sx={{ mb: 2 }}
-          />
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Profile Photo
+            </Typography>
+            {avatarPreview && (
+              <Avatar 
+                src={avatarPreview} 
+                alt="Avatar preview"
+                sx={{ width: 80, height: 80, mb: 2 }}
+              />
+            )}
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              sx={{ mb: 1 }}
+            >
+              {avatarFile ? 'Change Photo' : 'Upload Photo'}
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </Button>
+            {!avatarFile && formData.image && (
+              <TextField
+                margin="dense"
+                label="Or enter Image URL"
+                fullWidth
+                variant="outlined"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                size="small"
+              />
+            )}
+          </Box>
           <FormControlLabel
             control={
               <Switch
@@ -431,14 +638,116 @@ export default function Employees() {
             onClick={handleSubmit} 
             variant="contained"
             size={isMobile ? "medium" : "large"}
+            disabled={submitLoading}
             sx={{ minWidth: { xs: '80px', sm: '100px' } }}
           >
-            {editingItem ? 'Update' : 'Create'}
+            {submitLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              editingItem ? 'Update' : 'Create'
+            )}
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleDeleteCancel}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 200 }}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            minWidth: { xs: '280px', sm: '400px' },
+          },
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
+          <WarningIcon color="error" />
+          <Typography variant="h6" component="span">
+            Confirm Delete
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete <strong>{employeeToDelete?.first_name} {employeeToDelete?.last_name}</strong>? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button 
+            onClick={handleDeleteCancel}
+            disabled={deleteLoading}
+            sx={{ minWidth: '100px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            disabled={deleteLoading}
+            sx={{ minWidth: '100px' }}
+          >
+            {deleteLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Delete'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        TransitionComponent={Grow}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ 
+            minWidth: '300px',
+            animation: 'slideInRight 0.3s ease-out',
+            '@keyframes slideInRight': {
+              from: {
+                transform: 'translateX(100%)',
+                opacity: 0,
+              },
+              to: {
+                transform: 'translateX(0)',
+                opacity: 1,
+              },
+            },
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Backdrop loader for delete operations */}
+      <Backdrop
+        sx={{ 
+          color: '#fff', 
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backdropFilter: 'blur(4px)',
+        }}
+        open={deleteLoading}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress color="inherit" size={60} />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Deleting employee...
+          </Typography>
+        </Box>
+      </Backdrop>
     </Box>
   )
 }
+
 
 

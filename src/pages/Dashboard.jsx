@@ -78,26 +78,54 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom fontWeight="bold">
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="h4" 
+          gutterBottom 
+          fontWeight="bold"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
+          }}
+        >
           Dashboard
         </Typography>
-        <Typography variant="h6" color="text.secondary" gutterBottom>
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          gutterBottom
+          sx={{ 
+            fontSize: { xs: '1rem', sm: '1.25rem' }
+          }}
+        >
           Welcome back, {user?.name || user?.email}!
         </Typography>
         {isSuperAdmin && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              mt: 1,
+              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+            }}
+          >
             Super Admin - Manage Businesses and Users
           </Typography>
         )}
         {!isSuperAdmin && user?.business && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              mt: 1,
+              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+            }}
+          >
             Business: <strong>{user.business.name}</strong>
           </Typography>
         )}
       </Box>
 
-      <Grid container spacing={3} sx={{ mt: 2 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 1, sm: 2 } }}>
         {isSuperAdmin ? (
           <>
             <Grid item xs={12} sm={6} md={6}>
@@ -106,16 +134,29 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <BusinessIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Businesses</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <BusinessIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: 'primary.main', mb: 1 }} />
+                        <Typography 
+                          variant="h6"
+                          sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}
+                        >
+                          Businesses
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                        >
                           Create and manage restaurant businesses
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={isMobile ? 20 : 24} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
+                        <Typography 
+                          variant="h4" 
+                          color="primary.main"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}
+                        >
                           {businessCount}
                         </Typography>
                       )}
@@ -130,16 +171,29 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <PeopleIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6">Users</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <PeopleIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: 'primary.main', mb: 1 }} />
+                        <Typography 
+                          variant="h6"
+                          sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}
+                        >
+                          Users
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                        >
                           Create and manage user accounts
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={24} />
+                        <CircularProgress size={isMobile ? 20 : 24} />
                       ) : (
-                        <Typography variant="h4" color="primary.main">
+                        <Typography 
+                          variant="h4" 
+                          color="primary.main"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}
+                        >
                           {userCount}
                         </Typography>
                       )}
@@ -157,16 +211,31 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <PeopleIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h6" fontWeight="bold">Employees</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <PeopleIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'primary.main', mb: 1 }} />
+                        <Typography 
+                          variant="h6" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1.25rem' } }}
+                        >
+                          Employees
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
+                        >
                           Total employees
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={32} />
+                        <CircularProgress size={isMobile ? 24 : 32} />
                       ) : (
-                        <Typography variant="h3" color="primary.main" fontWeight="bold">
+                        <Typography 
+                          variant="h3" 
+                          color="primary.main" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
+                        >
                           {counts.employees}
                         </Typography>
                       )}
@@ -181,16 +250,31 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <OrderIcon sx={{ fontSize: 48, color: 'info.main', mb: 1 }} />
-                        <Typography variant="h6" fontWeight="bold">Total Orders</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <OrderIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'info.main', mb: 1 }} />
+                        <Typography 
+                          variant="h6" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1.25rem' } }}
+                        >
+                          Total Orders
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
+                        >
                           All orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={32} />
+                        <CircularProgress size={isMobile ? 24 : 32} />
                       ) : (
-                        <Typography variant="h3" color="info.main" fontWeight="bold">
+                        <Typography 
+                          variant="h3" 
+                          color="info.main" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
+                        >
                           {counts.orders}
                         </Typography>
                       )}
@@ -205,16 +289,31 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <OpenOrderIcon sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-                        <Typography variant="h6" fontWeight="bold">Open Orders</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <OpenOrderIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'success.main', mb: 1 }} />
+                        <Typography 
+                          variant="h6" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1.25rem' } }}
+                        >
+                          Open Orders
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
+                        >
                           Active orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={32} />
+                        <CircularProgress size={isMobile ? 24 : 32} />
                       ) : (
-                        <Typography variant="h3" color="success.main" fontWeight="bold">
+                        <Typography 
+                          variant="h3" 
+                          color="success.main" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
+                        >
                           {counts.openOrders}
                         </Typography>
                       )}
@@ -229,16 +328,31 @@ export default function Dashboard() {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
-                        <ClosedOrderIcon sx={{ fontSize: 48, color: 'grey.600', mb: 1 }} />
-                        <Typography variant="h6" fontWeight="bold">Closed Orders</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <ClosedOrderIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'grey.600', mb: 1 }} />
+                        <Typography 
+                          variant="h6" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1.25rem' } }}
+                        >
+                          Closed Orders
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
+                        >
                           Completed orders
                         </Typography>
                       </Box>
                       {loading ? (
-                        <CircularProgress size={32} />
+                        <CircularProgress size={isMobile ? 24 : 32} />
                       ) : (
-                        <Typography variant="h3" color="grey.600" fontWeight="bold">
+                        <Typography 
+                          variant="h3" 
+                          color="grey.600" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
+                        >
                           {counts.closedOrders}
                         </Typography>
                       )}

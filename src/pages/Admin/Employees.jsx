@@ -174,16 +174,25 @@ export default function Employees() {
           flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between', 
           alignItems: { xs: 'flex-start', sm: 'center' }, 
-          mb: 2,
+          mb: { xs: 2, sm: 3 },
           gap: { xs: 2, sm: 0 }
         }}
       >
-        <Typography variant="h4">Employees</Typography>
+        <Typography 
+          variant="h4"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
+            fontWeight: { xs: 600, sm: 700 }
+          }}
+        >
+          Employees
+        </Typography>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />} 
           onClick={handleOpenAdd}
-          fullWidth={{ xs: true, sm: false }}
+          fullWidth={isMobile}
+          size={isMobile ? "medium" : "large"}
         >
           Add New Employee
         </Button>
@@ -196,15 +205,51 @@ export default function Employees() {
           maxWidth: '100%',
         }}
       >
-        <Table sx={{ minWidth: 650 }}>
+        <Table sx={{ minWidth: { xs: 600, sm: 650 } }}>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>PIN</TableCell>
-              <TableCell>Active</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                ID
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                Name
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                Email
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                PIN
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                Active
+              </TableCell>
+              <TableCell sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontWeight: 600,
+                py: { xs: 1, sm: 1.5 }
+              }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -223,24 +268,54 @@ export default function Employees() {
             ) : (
               employees.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell>{employee.id}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
+                    {employee.id}
+                  </TableCell>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
                     {employee.first_name} {employee.last_name}
                   </TableCell>
-                  <TableCell>{employee.email}</TableCell>
-                  <TableCell>{employee.pin4 || 'N/A'}</TableCell>
-                  <TableCell>{employee.is_active ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={() => handleOpenEdit(employee)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(employee.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
+                    {employee.email}
+                  </TableCell>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
+                    {employee.pin4 || 'N/A'}
+                  </TableCell>
+                  <TableCell sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    py: { xs: 1, sm: 1.5 }
+                  }}>
+                    {employee.is_active ? 'Yes' : 'No'}
+                  </TableCell>
+                  <TableCell sx={{ py: { xs: 1, sm: 1.5 } }}>
+                    <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
+                      <IconButton 
+                        size={isMobile ? "small" : "medium"} 
+                        onClick={() => handleOpenEdit(employee)}
+                        sx={{ padding: { xs: '4px', sm: '8px' } }}
+                      >
+                        <EditIcon fontSize={isMobile ? "small" : "medium"} />
+                      </IconButton>
+                      <IconButton
+                        size={isMobile ? "small" : "medium"}
+                        onClick={() => handleDelete(employee.id)}
+                        color="error"
+                        sx={{ padding: { xs: '4px', sm: '8px' } }}
+                      >
+                        <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -270,7 +345,7 @@ export default function Employees() {
         fullScreen={isMobile}
       >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} Employee</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -284,7 +359,12 @@ export default function Employees() {
             value={formData.first_name}
             onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
             required
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              '& .MuiInputBase-root': {
+                fontSize: { xs: '0.875rem', sm: '1rem' }
+              }
+            }}
           />
           <TextField
             margin="dense"
@@ -335,9 +415,24 @@ export default function Employees() {
             label="Active"
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 },
+          pb: { xs: 2, sm: 3 },
+          gap: { xs: 1, sm: 2 }
+        }}>
+          <Button 
+            onClick={handleClose}
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
             {editingItem ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

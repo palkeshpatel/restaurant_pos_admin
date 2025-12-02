@@ -19,11 +19,15 @@ import {
   TextField,
   Alert,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
 import api from '../../services/api'
 
 export default function ModifierGroups() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
@@ -202,9 +206,15 @@ export default function ModifierGroups() {
         rowsPerPageOptions={[5, 10, 25, 50]}
       />
 
-      <Dialog open={openDialog} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleClose} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} Modifier Group</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -243,9 +253,24 @@ export default function ModifierGroups() {
             sx={{ mb: 2 }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 },
+          pb: { xs: 2, sm: 3 },
+          gap: { xs: 1, sm: 2 }
+        }}>
+          <Button 
+            onClick={handleClose}
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
             {editingItem ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

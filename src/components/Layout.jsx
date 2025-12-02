@@ -139,15 +139,38 @@ export default function Layout({ children }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontSize: { xs: '1rem', sm: '1.25rem' }
+            }}
+          >
             Restaurant POS Admin
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-            <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 2 } }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                display: { xs: 'none', sm: 'block' },
+                fontSize: { sm: '0.875rem', md: '1rem' },
+                maxWidth: { sm: 150, md: 200 },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               {user?.name || user?.email}
             </Typography>
             <Avatar
-              sx={{ cursor: 'pointer', width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}
+              sx={{ 
+                cursor: 'pointer', 
+                width: { xs: 32, sm: 40 }, 
+                height: { xs: 32, sm: 40 },
+                fontSize: { xs: '0.875rem', sm: '1rem' }
+              }}
               onClick={handleMenuOpen}
               src={user?.avatar}
             >
@@ -211,10 +234,14 @@ export default function Layout({ children }) {
           bgcolor: 'background.default',
           p: { xs: 1, sm: 2, md: 3 },
           minHeight: '100vh',
-          width: { md: `calc(100% - ${drawerWidth}px)` },
+          width: { 
+            xs: '100%',
+            md: `calc(100% - ${drawerWidth}px)` 
+          },
+          mt: { xs: 0, md: 0 },
         }}
       >
-        <Toolbar />
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
         {children}
       </Box>
     </Box>

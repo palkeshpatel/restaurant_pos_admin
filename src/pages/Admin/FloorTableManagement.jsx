@@ -22,6 +22,8 @@ import {
   FormControl,
   InputLabel,
   Paper,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Edit as EditIcon,
@@ -35,6 +37,8 @@ import {
 import api from '../../services/api'
 
 export default function FloorTableManagement() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [floors, setFloors] = useState([])
   const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(false)
@@ -371,9 +375,15 @@ export default function FloorTableManagement() {
     }
 
     return (
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>{getTitle()}</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -498,9 +508,24 @@ export default function FloorTableManagement() {
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 },
+          pb: { xs: 2, sm: 3 },
+          gap: { xs: 1, sm: 2 }
+        }}>
+          <Button 
+            onClick={handleCloseDialog}
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
             {editingItem ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

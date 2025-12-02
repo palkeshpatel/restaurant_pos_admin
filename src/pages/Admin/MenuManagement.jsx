@@ -35,6 +35,8 @@ import {
   InputLabel,
   Tabs,
   Tab,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Edit as EditIcon,
@@ -51,6 +53,8 @@ import {
 import api from '../../services/api'
 
 export default function MenuManagement() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [menus, setMenus] = useState([])
   const [categories, setCategories] = useState([])
   const [menuItems, setMenuItems] = useState([])
@@ -1034,9 +1038,15 @@ export default function MenuManagement() {
     }
 
     return (
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>{getTitle()}</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -1411,9 +1421,24 @@ export default function MenuManagement() {
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 },
+          pb: { xs: 2, sm: 3 },
+          gap: { xs: 1, sm: 2 }
+        }}>
+          <Button 
+            onClick={handleCloseDialog}
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
             {editingItem ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

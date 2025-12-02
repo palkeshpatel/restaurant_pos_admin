@@ -94,16 +94,26 @@ export default function DataTable({
           flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between', 
           alignItems: { xs: 'flex-start', sm: 'center' }, 
-          mb: 2,
+          mb: { xs: 2, sm: 3 },
           gap: { xs: 2, sm: 0 }
         }}
       >
-        <Typography variant="h4" component="h2">{title}</Typography>
+        <Typography 
+          variant="h4" 
+          component="h2"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
+            fontWeight: { xs: 600, sm: 700 }
+          }}
+        >
+          {title}
+        </Typography>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />} 
           onClick={handleOpenAdd}
           fullWidth={isMobile}
+          size={isMobile ? "medium" : "large"}
         >
           Add New
         </Button>
@@ -114,17 +124,43 @@ export default function DataTable({
         sx={{
           overflowX: 'auto',
           maxWidth: '100%',
+          '&::-webkit-scrollbar': {
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0,0,0,0.1)',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            borderRadius: '4px',
+          },
         }}
       >
-        <Table sx={{ minWidth: 650 }}>
+        <Table sx={{ minWidth: { xs: 600, sm: 650 } }}>
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                <TableCell key={col.field} sx={{ whiteSpace: { xs: 'nowrap', sm: 'normal' } }}>
+                <TableCell 
+                  key={col.field} 
+                  sx={{ 
+                    whiteSpace: { xs: 'nowrap', sm: 'normal' },
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    fontWeight: 600,
+                    py: { xs: 1, sm: 1.5 }
+                  }}
+                >
                   {col.label}
                 </TableCell>
               ))}
-              <TableCell>Actions</TableCell>
+              <TableCell 
+                sx={{ 
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  fontWeight: 600,
+                  py: { xs: 1, sm: 1.5 }
+                }}
+              >
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -147,17 +183,26 @@ export default function DataTable({
                     renderRow(item)
                   ) : (
                     columns.map((col) => (
-                      <TableCell key={col.field}>
+                      <TableCell 
+                        key={col.field}
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          py: { xs: 1, sm: 1.5 }
+                        }}
+                      >
                         {col.render ? col.render(item[col.field], item) : item[col.field]}
                       </TableCell>
                     ))
                   )}
-                  <TableCell>
+                  <TableCell sx={{ py: { xs: 1, sm: 1.5 } }}>
                     <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
                       <IconButton 
                         size={isMobile ? "small" : "medium"} 
                         onClick={() => handleOpenEdit(item)}
                         aria-label="edit"
+                        sx={{ 
+                          padding: { xs: '4px', sm: '8px' }
+                        }}
                       >
                         <EditIcon fontSize={isMobile ? "small" : "medium"} />
                       </IconButton>
@@ -166,6 +211,9 @@ export default function DataTable({
                         onClick={() => onDelete(item.id)} 
                         color="error"
                         aria-label="delete"
+                        sx={{ 
+                          padding: { xs: '4px', sm: '8px' }
+                        }}
                       >
                         <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
                       </IconButton>
@@ -203,7 +251,7 @@ export default function DataTable({
         fullScreen={isMobile}
       >
         <DialogTitle>{editingItem ? 'Edit' : 'Add'} {title}</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: { xs: 2, sm: 3 } }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -223,7 +271,12 @@ export default function DataTable({
               select={field.type === 'select'}
               multiline={field.multiline}
               rows={field.rows}
-              sx={{ mb: 2 }}
+              sx={{ 
+                mb: 2,
+                '& .MuiInputBase-root': {
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }
+              }}
             >
               {field.options?.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -233,9 +286,24 @@ export default function DataTable({
             </TextField>
           ))}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 },
+          pb: { xs: 2, sm: 3 },
+          gap: { xs: 1, sm: 2 }
+        }}>
+          <Button 
+            onClick={handleClose}
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            sx={{ minWidth: { xs: '80px', sm: '100px' } }}
+          >
             {editingItem ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

@@ -51,6 +51,7 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         py: { xs: 2, sm: 4 },
+        px: { xs: 2, sm: 3 },
       }}
     >
       <Box
@@ -61,13 +62,30 @@ export default function Login() {
           alignItems: 'center',
         }}
       >
-        <RestaurantIcon sx={{ fontSize: { xs: 48, sm: 60 }, color: 'primary.main', mb: 2 }} />
-        <Typography component="h1" variant="h4" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+        <RestaurantIcon sx={{ fontSize: { xs: 48, sm: 60 }, color: 'primary.main', mb: { xs: 1.5, sm: 2 } }} />
+        <Typography 
+          component="h1" 
+          variant="h4" 
+          gutterBottom 
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2.125rem' },
+            textAlign: 'center',
+            fontWeight: { xs: 600, sm: 700 }
+          }}
+        >
           Restaurant POS Admin
         </Typography>
         <Card sx={{ width: '100%', mt: { xs: 2, sm: 3 } }}>
-          <CardContent>
-            <Typography component="h2" variant="h6" gutterBottom>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Typography 
+              component="h2" 
+              variant="h6" 
+              gutterBottom
+              sx={{ 
+                fontSize: { xs: '1.125rem', sm: '1.25rem' },
+                fontWeight: 600
+              }}
+            >
               Sign In
             </Typography>
             {error && (
@@ -75,7 +93,7 @@ export default function Login() {
                 {error}
               </Alert>
             )}
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: { xs: 1, sm: 2 } }}>
               <TextField
                 margin="normal"
                 required
@@ -87,6 +105,11 @@ export default function Login() {
                 autoFocus
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                sx={{
+                  '& .MuiInputBase-root': {
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }
+                }}
               />
               <TextField
                 margin="normal"
@@ -99,6 +122,11 @@ export default function Login() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                sx={{
+                  '& .MuiInputBase-root': {
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }
+                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -106,6 +134,7 @@ export default function Login() {
                         aria-label="toggle password visibility"
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
+                        size="small"
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
@@ -117,8 +146,14 @@ export default function Login() {
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                sx={{ 
+                  mt: { xs: 2, sm: 3 }, 
+                  mb: { xs: 1, sm: 2 },
+                  py: { xs: 1.25, sm: 1.5 },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
                 disabled={loading}
+                size="large"
               >
                 {loading ? <CircularProgress size={24} /> : 'Sign In'}
               </Button>

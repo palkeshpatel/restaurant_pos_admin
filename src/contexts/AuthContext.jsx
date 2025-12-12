@@ -87,6 +87,10 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {
+    // During SSR/pre-rendering, return default values instead of throwing
+    if (typeof window === 'undefined') {
+      return { user: null, loading: true, login: async () => ({ success: false }), logout: async () => {}, fetchUser: async () => {} }
+    }
     throw new Error('useAuth must be used within AuthProvider')
   }
   return context

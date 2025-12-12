@@ -1,10 +1,11 @@
-'use client'
+import dynamicImport from 'next/dynamic'
 
-import dynamic from 'next/dynamic'
-
-const Login = dynamic(() => import('../../src/pages/Login'), {
+const Login = dynamicImport(() => import('../../src/pages/Login'), {
   ssr: false,
 })
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export default function LoginPage() {
   return <Login />

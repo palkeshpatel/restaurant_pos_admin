@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import {
   Box,
@@ -19,6 +21,8 @@ import {
   TextField,
   Alert,
   CircularProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
 import api from '../../services/api'
